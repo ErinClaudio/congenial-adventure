@@ -18,13 +18,22 @@ def color_alt(elevation):
 
 html = """Volcano name:<br><a href="https://www.google.com/search?q=%%22%s%%22" target="_blank">%s</a><br>Height: %s m"""
 
-map = folium.Map(location=[45.33, -90.09], zoom_start=4, tiles="Stamen Toner")
+map = folium.Map(location=[47.400218, -94.926297], zoom_start=4, tiles="Stamen Toner")
 
-fg = folium.FeatureGroup("My Map")
+fgv = folium.FeatureGroup("volcanes")
 
 for lt,ln,el,name in zip(lat,lon,elev,name):
     iframe = folium.IFrame(html=html % (name, name, el), width=200, height=100)
-    map.add_child(folium.CircleMarker(location=[lt,ln],radius=6, popup=folium.Popup(iframe),fill_color =color_alt(el),color="grey",fill_opacity =0.8))
+    fgv.add_child(folium.CircleMarker(location=[lt,ln],radius=6, popup=folium.Popup(iframe),fill_color =color_alt(el),color="grey",fill_opacity =0.8))
 
-map.add_child(fg)
+fgp = folium.FeatureGroup("population")
+
+fgp.add_child(folium.GeoJson(data=open('world.json',"r",encoding='utf-8-sig').read(),
+                            style_function=lambda x: {"fillColor": 'darkgreen' if x['properties']['POP2005'] < 10000000 else "blue" if 10000000 <= x['properties']['POP2005'] < 20000000 else "red"}))
+
+
+map.add_child(fgv)
+map.add_child(fgp)
+
+map.add_child(folium.LayerControl())
 map.save("Map_main.html")
